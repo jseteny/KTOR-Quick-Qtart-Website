@@ -21,6 +21,12 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 
+// Use "gradle -t installDist" to have automatic recompile
+// See https://ktor.io/servers/autoreload.html#recompiling-automatically-on-source-changes
+
+// Automatic reloading on class changes is set inside application.conf
+// See https://ktor.io/servers/autoreload.html
+
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @kotlin.jvm.JvmOverloads
@@ -50,7 +56,7 @@ fun Application.module(testing: Boolean = false) {
                 if (post["username"] != null && post["username"] == post["password"]) {
                     call.respondRedirect("/", permanent = false)
                 } else {
-                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Invalid login")))
+                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to " login")))
                 }
             }
 /*
