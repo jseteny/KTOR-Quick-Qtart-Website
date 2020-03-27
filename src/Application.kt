@@ -6,6 +6,7 @@ import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.http.*
 import freemarker.cache.*
+import io.ktor.auth.*
 import io.ktor.features.PartialContent
 import io.ktor.freemarker.*
 
@@ -20,18 +21,36 @@ fun Application.module(testing: Boolean = false) {
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
-
-    routing() {
-        get("/login") {
-            call.respond(FreeMarkerContent("login.ftl", null))
+    install(Authentication) {
+        form("login") {
+            userParamName = "username"
+            passwordParamName = "password"
+            challenge { call.respond(UnauthorizedResponse()) }
+            validate { credentials -> if (credentials.name == credentials.password) UserIdPrincipal(credentials.name) else null }
         }
-        post("/login") {
-            val post = call.receiveParameters()
-            if (post["username"] != null && post["username"] == post["password"]) {
-                call.respondText("OK")
-            } else {
-                call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Invalid login")))
+    }
+
+    routing {
+        route("/login") {
+            get {
+                call.respond(FreeMarkerContent("login.ftl", null))
             }
+            post {
+                val post = call.receiveParameters()
+                if (post["username"] != null && post["username"] == post["password"]) {
+                    call.respondRedirect("/", permanent = false)
+                } else {
+                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Invalid login")))
+                }
+            }
+/*
+            authenticate("login") {
+                post {
+                    val principal = call.principal<UserIdPrincipal>()
+                    call.respondRedirect("/", permanent = false)
+                }
+            }
+*/
         }
     }
     /*
@@ -47,5 +66,5 @@ fun Application.module(testing: Boolean = false) {
 */
 }
 
-data class IndexData(val items: List<Int>)
+// data class IndexData(val items: List<Int>)
 
