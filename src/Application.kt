@@ -13,6 +13,8 @@ import io.ktor.auth.form
 import io.ktor.features.PartialContent
 import io.ktor.freemarker.FreeMarker
 import io.ktor.freemarker.FreeMarkerContent
+import io.ktor.http.content.resources
+import io.ktor.http.content.static
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -47,6 +49,9 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
+        static("/static") {
+            resources("static")
+        }
         route("/login") {
             get {
                 call.respond(FreeMarkerContent("login.ftl", null))
@@ -56,7 +61,7 @@ fun Application.module(testing: Boolean = false) {
                 if (post["username"] != null && post["username"] == post["password"]) {
                     call.respondRedirect("/", permanent = false)
                 } else {
-                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to " login")))
+                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Error during login")))
                 }
             }
 /*
