@@ -6,20 +6,25 @@ import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.auth.*
 import io.ktor.features.PartialContent
 import io.ktor.freemarker.FreeMarker
 import io.ktor.freemarker.FreeMarkerContent
+import io.ktor.http.ContentType
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
+import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
+import io.ktor.sessions.sessions
+import javax.print.attribute.standard.JobOriginatingUserName
 
 // Use "gradle -t installDist" to have automatic recompile
 // See https://ktor.io/servers/autoreload.html#recompiling-automatically-on-source-changes
@@ -37,10 +42,9 @@ fun Application.module(testing: Boolean = false) {
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
-
-
-    // todo https://ktor.io/quickstart/guides/website.html#sessions
-
+    install(Sessions) {
+        cookie<MySession>("SESSION")
+    }
 
 /* Did not work for me. See  https://ktor.io/quickstart/guides/website.html#using-the-form-authentication
 
@@ -64,7 +68,10 @@ fun Application.module(testing: Boolean = false) {
             }
             post {
                 val post = call.receiveParameters()
-                if (post["username"] != null && post["username"] == post["password"]) {
+                val userName = post["username"]
+                if (userName != null && userName == post["password"]) {
+                    call.sessions.set("SESSION", MySession(userName))
+                    //val principal = call.principal<UserIdPrincipal>() ?: error("No principal")
                     call.respondRedirect("/html-freemarker", permanent = false)
                 } else {
                     call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Error during login")))
@@ -86,10 +93,16 @@ fun Application.module(testing: Boolean = false) {
         }
 
         get("/html-freemarker") {
-            call.respond(FreeMarkerContent("index.ftl", mapOf("data" to IndexData(listOf(1, 2, 3))), ""))
+            val session = call.sessions.get("SESSION") as MySession
+            call.respond(FreeMarkerContent("index.ftl", etag = "",
+                    model = mapOf(
+                            "data" to IndexData(listOf(1, 2, 3)),
+                            "userName" to session.userName
+                    )
+            ))
         }
     }
 }
 
+data class MySession(val userName: String)
 data class IndexData(val items: List<Int>)
-
