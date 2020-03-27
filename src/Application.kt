@@ -13,11 +13,13 @@ import io.ktor.auth.form
 import io.ktor.features.PartialContent
 import io.ktor.freemarker.FreeMarker
 import io.ktor.freemarker.FreeMarkerContent
+import io.ktor.http.ContentType
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
+import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
@@ -59,7 +61,7 @@ fun Application.module(testing: Boolean = false) {
             post {
                 val post = call.receiveParameters()
                 if (post["username"] != null && post["username"] == post["password"]) {
-                    call.respondRedirect("/", permanent = false)
+                    call.respondRedirect("/html-freemarker", permanent = false)
                 } else {
                     call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Error during login")))
                 }
@@ -73,19 +75,16 @@ fun Application.module(testing: Boolean = false) {
             }
 */
         }
-    }
-    /*
-    routing {
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
+            call.respondRedirect("/login", permanent = false)
+            // call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
         }
 
         get("/html-freemarker") {
             call.respond(FreeMarkerContent("index.ftl", mapOf("data" to IndexData(listOf(1, 2, 3))), ""))
         }
     }
-*/
 }
 
-// data class IndexData(val items: List<Int>)
+data class IndexData(val items: List<Int>)
 
