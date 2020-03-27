@@ -44,7 +44,7 @@ fun Application.module(testing: Boolean = false) {
         cookie<MySession>("SESSION")
     }
 
-/* Did not work for me. See  https://ktor.io/quickstart/guides/website.html#using-the-form-authentication
+/* Did not work for me. Please see  https://ktor.io/quickstart/guides/website.html#using-the-form-authentication
 
     install(Authentication) {
         form("login") {
