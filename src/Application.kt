@@ -9,24 +9,12 @@ import freemarker.cache.*
 import io.ktor.auth.*
 import io.ktor.features.PartialContent
 import io.ktor.freemarker.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 
-fun main(args: Array<String>) {
-    embeddedServer(
-            Netty,
-            watchPaths = listOf("."),
-            port = 8080,
-            module = Application::module
-    ).apply { start(wait = true) }
-}
-
-fun Application.module() {
-    module(false)
-}
+fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
-fun Application.module(testing: Boolean) {
+@kotlin.jvm.JvmOverloads
+fun Application.module(testing: Boolean = false) {
     install(PartialContent) {
 
     }
@@ -52,7 +40,7 @@ fun Application.module(testing: Boolean) {
                 if (post["username"] != null && post["username"] == post["password"]) {
                     call.respondRedirect("/", permanent = false)
                 } else {
-                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Invalid erere login")))
+                    call.respond(FreeMarkerContent("login.ftl", mapOf("error" to "Invalid login")))
                 }
             }
 /*
