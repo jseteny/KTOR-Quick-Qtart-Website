@@ -93,7 +93,7 @@ fun Application.module(testing: Boolean = false) {
 
         get("/html-dsl") {
 
-            val session = call.sessions.get("SESSION") as MySession
+            val session = call.sessions.get("SESSION") as MySession?
             val data = IndexData(listOf(1, 2, 3))
             call.respondHtml {
                 head {
@@ -101,7 +101,7 @@ fun Application.module(testing: Boolean = false) {
                 }
                 body {
                     p {
-                        text("Username: ${session.userName}")
+                        text("Username: ${session?.userName}")
                     }
                     ul {
                         for (item in data.items) {
